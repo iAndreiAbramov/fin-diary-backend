@@ -1,7 +1,7 @@
 import { registerAs } from '@nestjs/config';
-import Joi from 'joi';
-import { IAppConfig } from 'types/app-config.interface';
-import { AppMode } from 'types/app-mode.enum';
+import * as Joi from 'joi';
+import { IAppConfig } from '@src/types/app-config.interface';
+import { AppMode } from '@src/types/app-mode.enum';
 
 export default registerAs('app', (): IAppConfig => {
   const config: IAppConfig = {
@@ -9,9 +9,9 @@ export default registerAs('app', (): IAppConfig => {
     mode: process.env.APP_MODE as AppMode,
   };
 
-  const schema = Joi.object<IAppConfig, null, IAppConfig>({
+  const schema = Joi.object<IAppConfig, false, IAppConfig>({
     port: Joi.number().port().required(),
-    mode: Joi.string().valid([AppMode.Dev, AppMode.Prod]),
+    mode: Joi.string().valid(AppMode.Dev, AppMode.Prod),
   });
 
   const { error } = schema.validate(config);

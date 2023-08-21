@@ -6,11 +6,11 @@
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": false,
     "target": "ES2022",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./src/",
+    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -20,8 +20,8 @@
     "noFallthroughCasesInSwitch": false,
     "moduleResolution": "Node",
     "paths": {
-      "@module/*": [
-        "src/module/*"
+      "@src/*": [
+        "./src/*"
       ]
     }
   }
