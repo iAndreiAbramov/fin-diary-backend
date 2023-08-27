@@ -1,14 +1,14 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { CreateUserDto } from '@src/module/auth/dto/create-user.dto';
-import { CreateUserRdo } from '@src/module/auth/rdo/create-user.rdo';
-import { AuthService } from '@src/module/auth/auth.service';
+import { CreateUserDto } from '@src/module/users/dto/create-user.dto';
+import { CreateUserRdo } from '@src/module/users/rdo/create-user.rdo';
+import { UsersService } from '@src/module/users/users.service';
 import { fillObject } from '@src/utils/fill-object';
-import { LoginUserDto } from '@src/module/auth/dto/login-user.dto';
-import { LoginUserRdo } from '@src/module/auth/rdo/login-user.rdo';
+import { LoginUserDto } from '@src/module/users/dto/login-user.dto';
+import { LoginUserRdo } from '@src/module/users/rdo/login-user.rdo';
 
 @Controller('user')
-export class AuthController {
-  constructor(private readonly authService: AuthService) {
+export class UsersController {
+  constructor(private readonly authService: UsersService) {
   }
 
   @Post('register')
