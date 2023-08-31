@@ -7,11 +7,15 @@ export class UsersRepository {
   constructor(private readonly prismaService: PrismaService) {
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  public async findById(id: number): Promise<User> {
+    return this.prismaService.user.findUnique({ where: { id } });
+  }
+
+  public async findByEmail(email: string): Promise<User | null> {
     return this.prismaService.user.findUnique({ where: { email } });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
+  public async create(data: Prisma.UserCreateInput): Promise<User> {
     return this.prismaService.user.create({ data });
   }
 }

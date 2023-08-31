@@ -6,28 +6,36 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { Message } from '@src/constants/message';
 import { LoginUserDto } from '@src/module/users/dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { IJwtPayload } from '@src/types/jwt-payload.interface';
+import { LoginUserRdo } from '@src/module/users/rdo/login-user.rdo';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly authRepository: UsersRepository,
+    private readonly usersRepository: UsersRepository,
     private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
   ) {
   }
 
+  public async findById(id: number): Promise<User> {
+    return await this.usersRepository.findById(id);
+  }
+
   public async register({ email, password }: CreateUserDto): Promise<User> {
-    const existingUser = await this.authRepository.findByEmail(email);
+    const existingUser = await this.usersRepository.findByEmail(email);
 
     if (existingUser) {
       throw new ConflictException(Message.UserWithEmailExists(email));
     }
 
     const passwordHash = await this.hashPassword(password);
-    return this.authRepository.create({ email, passwordHash });
+    return this.usersRepository.create({ email, passwordHash });
   }
 
-  public async login({ email, password }: LoginUserDto): Promise<User> {
-    const existingUser = await this.authRepository.findByEmail(email);
+  public async login({ email, password }: LoginUserDto): Promise<LoginUserRdo> {
+    const existingUser = await this.usersRepository.findByEmail(email);
 
     if (!existingUser) {
       throw new NotFoundException(Message.UserWithEmailNotFound(email));
@@ -39,11 +47,20 @@ export class UsersService {
       throw new UnauthorizedException(Message.PasswordIsIncorrect());
     }
 
-    return existingUser;
+    return { ...existingUser, accessToken: await this.prepareJwt(existingUser) };
   }
 
-  public async hashPassword(password: string): Promise<string> {
+  private async hashPassword(password: string): Promise<string> {
     const saltRounds = this.configService.getOrThrow('app.saltRounds');
     return await bcrypt.hash(password, saltRounds);
+  }
+
+  private async prepareJwt(user: User): Promise<string> {
+    const jwtPayload: IJwtPayload = {
+      id: user.id,
+      email: user.email,
+    };
+
+    return await this.jwtService.signAsync(jwtPayload);
   }
 }

@@ -8,6 +8,9 @@ export class LoginUserRdo implements User {
   @Expose()
   email: string;
 
+  @Expose()
+  accessToken: string;
+
   @Exclude()
   createdAt: Date;
 
