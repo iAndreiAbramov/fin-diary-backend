@@ -9,12 +9,14 @@ export default registerAs('app', (): IAppConfig => {
     port: parseInt(process.env.APP_PORT),
     mode: process.env.APP_MODE as AppMode,
     saltRounds: parseInt(process.env.SALT_ROUNDS),
+    jwtSecret: process.env.JWT_SECRET,
   };
 
   const schema = Joi.object<IAppConfig, false, IAppConfig>({
     port: Joi.number().port().required(),
     mode: Joi.string().valid(AppMode.Dev, AppMode.Prod).default(AppMode.Dev),
     saltRounds: Joi.number().required(),
+    jwtSecret: Joi.string().required(),
   });
 
   const { error } = schema.validate(config);
