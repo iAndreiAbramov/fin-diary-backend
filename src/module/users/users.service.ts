@@ -9,6 +9,7 @@ import { LoginUserDto } from '@src/module/users/dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { IJwtPayload } from '@src/types/jwt-payload.interface';
 import { LoginUserRdo } from '@src/module/users/rdo/login-user.rdo';
+import { ChangePasswordDto } from '@src/module/users/dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -41,13 +42,35 @@ export class UsersService {
       throw new NotFoundException(Message.UserWithEmailNotFound(email));
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, existingUser.passwordHash);
+    const isPasswordCorrect = await this.checkPassword(password, existingUser.passwordHash);
 
     if (!isPasswordCorrect) {
       throw new UnauthorizedException(Message.PasswordIsIncorrect());
     }
 
     return { ...existingUser, accessToken: await this.prepareJwt(existingUser) };
+  }
+
+  public async changePassword({ id, oldPassword, newPassword }: ChangePasswordDto): Promise<void> {
+    const existingUser = await this.usersRepository.findById(id);
+
+    if (!existingUser) {
+      throw new NotFoundException(Message.UserWithIdNotFound(existingUser.id));
+    }
+
+    const isOldPasswordCorrect = await this.checkPassword(oldPassword, existingUser.passwordHash);
+
+    if (!isOldPasswordCorrect) {
+      throw new UnauthorizedException(Message.PasswordIsIncorrect());
+    }
+
+    const newUser = { ...existingUser, passwordHash: await this.hashPassword(newPassword) };
+
+    await this.usersRepository.update(newUser);
+  }
+
+  private async checkPassword(password: string, passwordHash: string): Promise<boolean> {
+    return await bcrypt.compare(password, passwordHash);
   }
 
   private async hashPassword(password: string): Promise<string> {

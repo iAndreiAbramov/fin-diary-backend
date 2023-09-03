@@ -15,8 +15,11 @@ export class IsOwnerJwtGuard implements CanActivate {
       const [, token] = authHeader.split(' ');
       const jwtUser = await this.jwtService.verifyAsync(token);
       const params = request?.params;
+      const body = request?.body;
 
-      return String(jwtUser.id) === String(params.id);
+      const passedId = body?.id || params?.id ;
+
+      return String(jwtUser.id) === String(passedId);
 
     } catch {
       throw new ForbiddenException();

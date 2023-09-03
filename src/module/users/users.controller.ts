@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from '@src/module/users/dto/create-user.dto';
 import { CreateUserRdo } from '@src/module/users/rdo/create-user.rdo';
 import { UsersService } from '@src/module/users/users.service';
@@ -9,6 +9,7 @@ import { IsOwnerJwtGuard } from '@src/module/users/guards/is-owner-jwt-guard.ser
 import { GetUserRdo } from '@src/module/users/rdo/get-user.rdo';
 import { GetUserParams } from '@src/module/users/params/get-user.params';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ChangePasswordDto } from '@src/module/users/dto/change-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -40,14 +41,21 @@ export class UsersController {
     return fillObject(CreateUserRdo, user);
   }
 
+  @UseGuards(IsOwnerJwtGuard)
+  @Patch('change-password')
+  @HttpCode(HttpStatus.OK)
+  public async changePassword(@Body() dto: ChangePasswordDto): Promise<void> {
+    return this.usersService.changePassword(dto);
+  }
+
   @ApiOkResponse({
     type: LoginUserRdo,
   })
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  @HttpCode(HttpStatus.OK)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   public async login(@Body() dto: LoginUserDto): Promise<LoginUserRdo> {
     const user = await this.usersService.login(dto);
     return fillObject(LoginUserRdo, user);
