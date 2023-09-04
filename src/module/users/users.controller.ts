@@ -8,7 +8,14 @@ import { LoginUserRdo } from '@src/module/users/rdo/login-user.rdo';
 import { IsOwnerJwtGuard } from '@src/module/users/guards/is-owner-jwt-guard.service';
 import { GetUserRdo } from '@src/module/users/rdo/get-user.rdo';
 import { GetUserParams } from '@src/module/users/params/get-user.params';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiHeader,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { ChangePasswordDto } from '@src/module/users/dto/change-password.dto';
 
 @Controller('users')
@@ -21,6 +28,11 @@ export class UsersController {
   })
   @ApiUnauthorizedResponse({
     description: 'JWT access token is invalid',
+  })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+    example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
   })
   @UseGuards(IsOwnerJwtGuard)
   @Get(':id')
@@ -41,9 +53,23 @@ export class UsersController {
     return fillObject(CreateUserRdo, user);
   }
 
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+    example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+  })
+  @ApiOkResponse({
+    description: 'OK',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'JWT token is invalid',
+  })
+  @ApiForbiddenResponse({
+    description: 'Password is incorrect',
+  })
   @UseGuards(IsOwnerJwtGuard)
-  @Patch('change-password')
   @HttpCode(HttpStatus.OK)
+  @Patch('change-password')
   public async changePassword(@Body() dto: ChangePasswordDto): Promise<void> {
     return this.usersService.changePassword(dto);
   }
@@ -54,8 +80,8 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: 'Bad request',
   })
-  @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Post('login')
   public async login(@Body() dto: LoginUserDto): Promise<LoginUserRdo> {
     const user = await this.usersService.login(dto);
     return fillObject(LoginUserRdo, user);
