@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { UsersController } from '@src/module/users/users.controller';
 import { UsersService } from '@src/module/users/users.service';
 import { PrismaModule } from '@src/module/prisma/prisma.module';
 import { UsersRepository } from '@src/module/users/users.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { ParseUserIdMiddleware } from '@src/middleware/parse-user-id.middleware';
 
 @Module({
   controllers: [UsersController],
@@ -19,5 +20,8 @@ import { ConfigService } from '@nestjs/config';
     })],
   exports: [UsersService],
 })
-export class UsersModule {
+export class UsersModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(ParseUserIdMiddleware).forRoutes(UsersController);
+  }
 }

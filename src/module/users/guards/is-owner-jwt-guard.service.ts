@@ -1,28 +1,12 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class IsOwnerJwtGuard implements CanActivate {
-  constructor(
-    private readonly jwtService: JwtService,
-  ) {
-  }
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    try {
-      const request = context.switchToHttp().getRequest();
-      const authHeader = request.headers.authorization;
-      const [, token] = authHeader.split(' ');
-      const jwtUser = await this.jwtService.verifyAsync(token);
-      const params = request?.params;
-      const body = request?.body;
+    const request = context.switchToHttp().getRequest();
+    const passedId = parseInt(request.params?.id) || request.body?.id;
+    const userId = parseInt(request.query?.userId);
 
-      const passedId = body?.id || params?.id ;
-
-      return String(jwtUser.id) === String(passedId);
-
-    } catch {
-      throw new ForbiddenException();
-    }
+    return passedId && userId && passedId === userId;
   }
 }
