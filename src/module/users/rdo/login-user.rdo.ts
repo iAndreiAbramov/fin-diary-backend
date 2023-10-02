@@ -17,13 +17,8 @@ export class LoginUserRdo {
   })
   @Expose()
   email: string;
-
-  @ApiProperty({
-    type: String,
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJmYWtlQGZha2UuY28iLCJpYXQiOjE2OTM3NDc3NzJ9',
-    description: 'JWT Access Token',
-  })
-  @Expose()
+  
+  @Exclude()
   accessToken: string;
 
   @Exclude()

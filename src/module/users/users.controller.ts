@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from '@src/module/users/dto/create-user.dto';
 import { CreateUserRdo } from '@src/module/users/rdo/create-user.rdo';
 import { UsersService } from '@src/module/users/users.service';
@@ -17,6 +17,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ChangePasswordDto } from '@src/module/users/dto/change-password.dto';
+import { Response } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -82,8 +83,12 @@ export class UsersController {
   })
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  public async login(@Body() dto: LoginUserDto): Promise<LoginUserRdo> {
+  public async login(
+    @Body() dto: LoginUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<LoginUserRdo> {
     const user = await this.usersService.login(dto);
+    res.setHeader('X-Token', user.accessToken);
     return fillObject(LoginUserRdo, user);
   }
 }
