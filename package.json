@@ -20,6 +20,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prepare": "husky install",
+    "precommit": "lint-staged",
     "db:up": "docker compose --file docker-compose.dev.yml --project-name \"fin-diary\" up -d",
     "db:down": "docker compose --file docker-compose.dev.yml --project-name \"fin-diary\" down"
   },
@@ -35,6 +36,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "joi": "^17.9.2",
+    "lint-staged": "^14.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
   },
@@ -80,5 +82,18 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run precommit"
+    }
+  },
+  "lint-staged": {
+    "**/src/**/*.+(js,ts,json)": [
+      "prettier --write && git add -A"
+    ],
+    "**/src/**/*.{ts}": [
+      "eslint --max-warnings=0 --fix \"**/*.+(ts)\""
+    ]
   }
 }
