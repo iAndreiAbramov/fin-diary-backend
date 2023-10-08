@@ -1,4 +1,17 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Res,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateUserDto } from '@src/module/users/dto/create-user.dto';
 import { CreateUserRdo } from '@src/module/users/rdo/create-user.rdo';
 import { UsersService } from '@src/module/users/users.service';
@@ -89,6 +102,28 @@ export class UsersController {
   ): Promise<LoginUserRdo> {
     const user = await this.usersService.login(dto);
     res.setHeader('X-Token', user.accessToken);
+    return fillObject(LoginUserRdo, user);
+  }
+
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'JWT Token',
+    example: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+  })
+  @ApiOkResponse({
+    type: LoginUserRdo,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'JWT token is invalid',
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post('check')
+  public async check(@Query() query: { userId?: string }) {
+    if (!query.userId) {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.usersService.findById(Number(query.userId));
     return fillObject(LoginUserRdo, user);
   }
 }
