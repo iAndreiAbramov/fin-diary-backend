@@ -52,7 +52,7 @@ export class UsersService {
   }
 
   public async changePassword({ id, oldPassword, newPassword }: ChangePasswordDto): Promise<void> {
-    const existingUser = await this.usersRepository.findById(id);
+    const existingUser = await this.usersRepository.findById(Number(id));
 
     if (!existingUser) {
       throw new NotFoundException(Message.UserWithIdNotFound(existingUser.id));

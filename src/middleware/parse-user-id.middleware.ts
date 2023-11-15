@@ -8,15 +8,15 @@ export class ParseUserIdMiddleware implements NestMiddleware {
   constructor(private readonly jwtService: JwtService) {
   }
 
-  async use(req: Request, res: Response, next: NextFunction): Promise<void> {
-    const authorizationHeader = req.headers?.authorization;
+  async use(req: Request, _res: Response, next: NextFunction): Promise<void> {
+    const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) {
-      next();
+      return next();
     }
 
     const [type, token] = authorizationHeader.split(' ');
     if (!type || type !== 'Bearer' || !token) {
-      next();
+      return next();
     }
 
     let jwtUser: IJwtPayload;
@@ -28,6 +28,6 @@ export class ParseUserIdMiddleware implements NestMiddleware {
     }
 
     req.query.userId = String(jwtUser?.id);
-    next();
+    return next();
   }
 }

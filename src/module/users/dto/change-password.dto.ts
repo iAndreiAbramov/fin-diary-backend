@@ -3,7 +3,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ChangePasswordDto {
   @IsNumber()
-  id: number;
+  @ApiProperty({
+    type: String,
+    description: 'User id',
+    example: '3'
+  })
+  id: string;
 
   @ApiProperty({
     type: String,

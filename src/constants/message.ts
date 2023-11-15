@@ -1,6 +1,6 @@
 export const Message = {
-  UserWithEmailExists: (email: string): string => `User with email: ${email} already exists`,
-  UserWithEmailNotFound: (email: string): string => `User with email: ${email} not found`,
-  UserWithIdNotFound: (id: number): string => `User with id: ${id} not found`,
-  PasswordIsIncorrect: () => 'Password is incorrect',
+  UserWithEmailExists: (email: string): string => `Пользователь с email: ${email} уже существует`,
+  UserWithEmailNotFound: (email: string): string => `Пользователь с email: ${email} не найден`,
+  UserWithIdNotFound: (id: number): string => `Пользователь с id: ${id} не найден`,
+  PasswordIsIncorrect: () => 'Email или пароль указаны неверно',
 } as const;
