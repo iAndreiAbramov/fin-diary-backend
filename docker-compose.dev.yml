@@ -24,18 +24,6 @@ services:
     networks:
       - fin-diary.network
 
-  fin-diary.pgadmin:
-    image: dpage/pgadmin4
-    container_name: fin-diary.pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "fake@gmail.com"
-      PGADMIN_DEFAULT_PASSWORD: "test"
-      PGADMIN_CONFIG_SERVER_MODE: "False"
-    ports:
-      - "8082:80"
-    networks:
-      - fin-diary.network
-
 volumes:
   fin-diary.volume:
 
