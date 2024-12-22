@@ -1,7 +1,5 @@
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from '@src/module/users/dto/create-user.dto';
-import { UsersRepository } from '@src/module/users/users.repository';
-import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { Message } from '@src/constants/message';
@@ -10,33 +8,41 @@ import { JwtService } from '@nestjs/jwt';
 import { IJwtPayload } from '@src/types/jwt-payload.interface';
 import { LoginUserRdo } from '@src/module/users/rdo/login-user.rdo';
 import { ChangePasswordDto } from '@src/module/users/dto/change-password.dto';
+import { Repository } from 'typeorm';
+import { UserEntity } from '@src/module/users/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly usersRepository: UsersRepository,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    @InjectRepository(UserEntity)
+    private readonly usersRepository: Repository<UserEntity>,
   ) {
   }
 
-  public async findById(id: number): Promise<User> {
-    return await this.usersRepository.findById(id);
+  public async findById(id: number): Promise<UserEntity> {
+    return await this.usersRepository.findOne({ where: { id } });
   }
 
-  public async register({ email, password }: CreateUserDto): Promise<User> {
-    const existingUser = await this.usersRepository.findByEmail(email);
+  public async findByEmail(email: string): Promise<UserEntity> {
+    return await this.usersRepository.findOne({ where: { email } });
+  }
+
+  public async register({ email, password }: CreateUserDto): Promise<UserEntity> {
+    const existingUser = await this.findByEmail(email);
 
     if (existingUser) {
       throw new ConflictException(Message.UserWithEmailExists(email));
     }
 
     const passwordHash = await this.hashPassword(password);
-    return this.usersRepository.create({ email, passwordHash });
+    return this.usersRepository.save({ email, passwordHash });
   }
 
   public async login({ email, password }: LoginUserDto): Promise<LoginUserRdo> {
-    const existingUser = await this.usersRepository.findByEmail(email);
+    const existingUser = await this.findByEmail(email);
 
     if (!existingUser) {
       throw new NotFoundException(Message.UserWithEmailNotFound(email));
@@ -52,7 +58,7 @@ export class UsersService {
   }
 
   public async changePassword({ id, oldPassword, newPassword }: ChangePasswordDto): Promise<void> {
-    const existingUser = await this.usersRepository.findById(Number(id));
+    const existingUser = await this.findById(id);
 
     if (!existingUser) {
       throw new NotFoundException(Message.UserWithIdNotFound(existingUser.id));
@@ -66,7 +72,7 @@ export class UsersService {
 
     const newUser = { ...existingUser, passwordHash: await this.hashPassword(newPassword) };
 
-    await this.usersRepository.update(newUser);
+    await this.usersRepository.save(newUser);
   }
 
   private async checkPassword(password: string, passwordHash: string): Promise<boolean> {
@@ -78,7 +84,7 @@ export class UsersService {
     return await bcrypt.hash(password, saltRounds);
   }
 
-  private async prepareJwt(user: User): Promise<string> {
+  private async prepareJwt(user: UserEntity): Promise<string> {
     const jwtPayload: IJwtPayload = {
       id: user.id,
       email: user.email,
